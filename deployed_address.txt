@@ -1,0 +1,7 @@
+Deployed Addresses
+
+Raffle Contract:
+    Kovan:  0xb396B1E0f0d6Eb1eBE2b059077313a68A9b78e71
+
+RaffleNFT Contract:
+    Kovan:  0x01c404F780b9B0DCF5fe8f67B94B9Cf88A847831
