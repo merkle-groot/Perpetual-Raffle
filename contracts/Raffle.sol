@@ -242,11 +242,16 @@ contract Raffle is AccessControl, VRFConsumerBase, Pausable, IERC721Receiver{
         require(randomResult != 0, "Raffle: Please wait for Chainlink VRF to update the winner first.");
 
         uint256 randomNumber = randomResult;
-        while(slotOwners[randomNumber % slotOwners.length] == address(0)){
-            randomNumber = (randomNumber + 1) % slotOwners.length;
+        address winner;
+
+        while(true){
+            if(slotOwners[randomNumber % slotOwners.length] != address(0)){
+                winner = slotOwners[randomNumber % slotOwners.length];
+                break;
+            }
+
+            randomNumber += 1;        
         }
-        // Find winner of NFT
-        address winner = slotOwners[randomNumber % numSlotsFilled];
 
         // Transfer NFT to winner
         IERC721(nftContract).safeTransferFrom(address(this), winner, nftID);

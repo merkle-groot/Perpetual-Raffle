@@ -12,6 +12,7 @@ from scripts.helpful_scripts import (
 noOfSlots = 1000
 slotPrice = "0.001 ether"
 
+
 @pytest.fixture(scope="module")
 def test_contracts(get_keyhash, chainlink_fee):
     # Arrange
@@ -38,6 +39,7 @@ def test_contracts(get_keyhash, chainlink_fee):
 
     return nft, raffle
 
+# Test the ability to mint NFTs and send it to Raffle Contract
 def test_nft_minting(test_contracts):
     nft, raffle = test_contracts
     currentPhase = raffle.currentPhase()
@@ -58,6 +60,7 @@ def test_nft_minting(test_contracts):
     isOwned = raffle.nftOwned()
     assert isOwned == True
 
+# Test if slots can be purchased by users with providing right amount of Ether
 def test_purchase_slots(test_contracts):
     nft, raffle = test_contracts
     noOfSlotsRaffle = raffle.numSlotsAvailable()
@@ -73,6 +76,7 @@ def test_purchase_slots(test_contracts):
     slotsFilled = raffle.numSlotsFilled()
     assert slotsFilled == 10
 
+# Test if it gives an error if no Ether is passed
 def test_purchase_slots_no_ether_passed(test_contracts):
     nft, raffle = test_contracts
 
@@ -88,7 +92,7 @@ def test_purchase_slots_no_ether_passed(test_contracts):
     slotsFilledAfter = raffle.numSlotsFilled()
     assert slotsFilledBefore == slotsFilledAfter
 
-
+# Test if it gives an error when user tries to purchase more than the max number of slots
 def test_purchase_slots_more_than_max_slots(test_contracts):
     nft, raffle = test_contracts
 
@@ -103,6 +107,7 @@ def test_purchase_slots_more_than_max_slots(test_contracts):
     slotsFilledAfter = raffle.numSlotsFilled()
     assert slotsFilledBefore == slotsFilledAfter
 
+# Helper Fn to randomize the slot owners to dynamically test refund fn
 def test_purchase_slots_for_testing_refunds(test_contracts):
     nft, raffle = test_contracts
 
@@ -126,6 +131,7 @@ def test_purchase_slots_for_testing_refunds(test_contracts):
         }
     )
 
+# Test if the user is able to get a refund on slots they bought
 def test_refund_slots(test_contracts):
     nft, raffle = test_contracts
 
@@ -162,9 +168,18 @@ def test_refund_slots(test_contracts):
     assert accout3DetailsAfter == [0, 0, 1]
     assert noOfSlotsFilledBefore == noOfSlotsFilledAfter + len(slotsToDelete)
 
-
-
+# Test if anyone else is not able to trigger lockdown period
 def test_enter_lock_period(test_contracts):
+    nft, raffle = test_contracts
+
+    with reverts():
+        raffle.enterLockPeriod({"from": get_account(4)})
+    isPaused = raffle.paused()
+
+    assert isPaused == False
+
+# Test if the owner is able to trigger lockdown period
+def test_enter_lock_period_owner(test_contracts):
     nft, raffle = test_contracts
 
     raffle.enterLockPeriod()
@@ -172,9 +187,21 @@ def test_enter_lock_period(test_contracts):
 
     assert isPaused == True
 
+# Helper fn to forward time by 7 days to exit lockDown Period
 def test_forward_time_by_7days():
     rpc.sleep(60*60*24*7)
 
+# Test if anyone else is able to exit the lock period
+def test_exit_lock_period(test_contracts):
+    nft, raffle = test_contracts
+
+    with reverts():
+        raffle.exitLockPeriod({"from": get_account(4)})
+    isPaused = raffle.paused()
+
+    assert isPaused == True
+
+# Exit lock period and make the chainlink contract to feed VRF
 def test_can_request_random_number(get_keyhash, chainlink_fee, test_contracts):
     nft, raffle = test_contracts
 
@@ -184,6 +211,9 @@ def test_can_request_random_number(get_keyhash, chainlink_fee, test_contracts):
     
     requestId = raffle.exitLockPeriod()
     print(requestId.return_value)
+
+    isPaused = raffle.paused()
+    assert isPaused == False
     
     
     get_contract("vrf_coordinator").callBackWithRandomness(
@@ -194,16 +224,14 @@ def test_can_request_random_number(get_keyhash, chainlink_fee, test_contracts):
     print("Result:", raffle.randomResult())
     print("TOtal Slots:", raffle.numSlotsFilled())
 
-    isPaused = raffle.paused()
-    assert isPaused == False
-
+# Test if the contract is able to pick a winner
 def test_disburse_winner(test_contracts):
     nft, raffle = test_contracts
 
     result = raffle.disburseWinner()
 
-    isSent = raffle.nftOwned()
-    assert isSent == False
+    isOwned = raffle.nftOwned()
+    assert isOwned == False
     
 def test_new_round(test_contracts):
     nft, raffle = test_contracts
@@ -227,6 +255,7 @@ def test_new_round(test_contracts):
 
     isOwned = raffle.nftOwned()
     assert isOwned == True
+
 
 def test_get_free_slots(test_contracts):
     nft, raffle = test_contracts
@@ -265,7 +294,58 @@ def test_free_slots_above_max(test_contracts):
     account5DetailsAfter = list(raffle.addressToSlotsOwner(get_account(5)))
     assert account5DetailsAfter == account5DetailsBefore
 
+def test_purchase_slots_new_round(test_contracts):
+    nft, raffle = test_contracts
+
+    account5DetailsBefore = list(raffle.addressToSlotsOwner(get_account(5)))
+
+    raffle.purchaseSlot(
+        10, 0, {
+            "from": get_account(5),
+            "value": "0.01 ether"
+        }
+    )
+
+    account5DetailsAfter = list(raffle.addressToSlotsOwner(get_account(5)))
+
+    assert account5DetailsAfter == [account5DetailsBefore[0] + 10, account5DetailsBefore[1] + 10, 2]
+
+
+def test_refund_in_new_round(test_contracts):
+    nft, raffle = test_contracts
+
+    noOfSlotsFilledBefore = raffle.numSlotsFilled()
+
+    slotOwners = list(raffle.getSlotOwners())
+    account5Slots = []
+
+    for i in range(len(slotOwners)):
+        if slotOwners[i] == get_account(5):
+            account5Slots.append(i)
     
+    print(len(account5Slots))
+
+    account5DetailsBefore = list(raffle.addressToSlotsOwner(get_account(5)))
+
+    assert account5DetailsBefore[0] == len(account5Slots)
+
+    print(account5Slots)
+
+    # Call Refund Fn
+    raffle.refundSlot(account5Slots[:account5DetailsBefore[1]], {"from": get_account(5)})
+
+    account5DetailsAfter = list(raffle.addressToSlotsOwner(get_account(5)))
+
+    noOfSlotsFilledAfter= raffle.numSlotsFilled()
+
+    assert account5DetailsAfter == [len(account5Slots) - account5DetailsBefore[1], 0, 2]
+    assert noOfSlotsFilledBefore == noOfSlotsFilledAfter + account5DetailsBefore[1]
+
+
+
+
+
+
 
 
 
