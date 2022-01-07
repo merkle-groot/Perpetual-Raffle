@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {Table, Button, Input} from "react-bootstrap";
+import {Table, Button} from "react-bootstrap";
 import Web3 from 'web3';
 import RaffleJSON  from "../build/contracts/Raffle.json";
 
