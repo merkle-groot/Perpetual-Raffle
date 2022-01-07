@@ -1,0 +1,43 @@
+.logo-image{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-bar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    
+    /* max-width: 50%; */
+}
+
+
+
+/* nav{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 10vh;
+    border-radius: 1em;
+    color:white;
+} */
+
+.nav-links{
+    width:50h;
+    border: 1px double #000000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+}
+
+.nav-ind{
+    margin: 10px 30px;
+    font-size: 30px;
+    font-family: 'Roboto', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #121212;
+}

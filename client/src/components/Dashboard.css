@@ -1,0 +1,45 @@
+.dashboard{
+    display: block;
+    margin: auto;
+    width: 50%;
+    border: 3px solid black;
+    padding: 10px;
+}
+
+.card{
+    border: 3px solid black !important;
+    border-radius: 2px !important;
+    font-family: 'Roboto', sans-serif;
+    width: 100%;
+    /* margin: 0.1em; */
+}
+
+.deetsCard{
+    border-top: 0px;
+}
+
+.imageCard{
+    border-bottom: 0px !important;
+}
+
+
+img {
+    height: undefined;
+    width: undefined;
+}
+
+.buttonArea{
+    margin: 0.2em;
+}
+
+.buttonArea input{
+    width: 200px;
+}
+
+.buttonArea button{
+    width: 200px;
+}
+
+.Free button{
+    width: 400px;
+}
