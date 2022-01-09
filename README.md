@@ -1,30 +1,4 @@
 <div id="top"></div>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
-
-
-
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-
 
 <!-- PROJECT LOGO -->
 <br />
@@ -39,7 +13,7 @@
     A Non-Zero Sum Raffle
     <br />
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
+    <a href="">View Demo</a>
     ·
     <a href="https://github.com/merkle-groot/blockchain-developer-bootcamp-final-project/issues">Report Bug</a>
     ·
@@ -77,20 +51,41 @@
 
 
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
+<!-- ABOUT THE PROJECT
+## About The Project -->
 
-![Product Name Screen Shot]("./images/screenshot.png)
-There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+![Product Name Screen Shot](./images/screenshot.png)
+## What is Perp* Raffle?
+Perp* Raffle is an alternative take on NFT Raffle, which provides fair value to all the parties in the Raffle. People can get slots in the Raffle by just staking their ETH for a certain period of time which is a far cry from the traditional Raffles in which the Raffle operator makes away with huge payday without providing much value to the process. In Perp*, the operator's revenue source comes from lending the ETH provided by the people, which is returned to them fully or partially at the end of the staking period. 
 
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should implement DRY principles to the rest of your life :smile:
+## How does it work?
+Instead of the Raffle being a one-off for a single NFT, there are multiple rounds i.e it is Perpetual! Each round has a single NFT with a single winner. And if the person stakes the ETH for more than one round, they are eligible for free slots in each subsequent round (compund interest? but for slots in the raffle).The free slots are not eligible for refunding/unstaking, the best part about these slots are that they can be carried on for further rounds even if they completely unstake their initial ETH. (win-win situation)
 
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
+![Product Name Screen Shot](./images/Rounds.png)
 
-Use the `BLANK_README.md` to get started.
+
+Each round is divided into phases:
+
+* Waiting Period:
+  * For the first round, this only involves sending an NFT to the Raffle contract which initializes all the parameters needed for its functioning.
+  * In the next rounds, making a VRF coordinator call to Chainlink, waiting for the result and picking a winner is all part of this phase.
+  * A winner is chosen based on the random string returned by Chainlink oracle and a new round is started by an NFT drop to the contract and the process continues...
+
+* Funding Period:
+  * This is the phase in which the users' can stake/unstake their ETH and get slots.
+  * Reedeming of free slots takes place in this phase.
+
+* Lock Period:
+  * This is the part which is totally upto the Raffle operator to decide on. They can generate income by sending the staked funds to Lending platforms or any DeFi app that can give sufficient yield to offset the initial cost of setting up the Raffle.
+  * The users' cannot stake/unstake their funds during this phase, they need to wait until the next funding phase.
+
+
+
+
+
+![Product Name Screen Shot](./images/PhasesBG.png)
+
+Currently the timeframe for each phase is implemented as shown in the above diagram, with the exception being that waiting period depends on the delay introduced by the operator.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -115,34 +110,47 @@ Perp* Raffle is made using open-source projects that you know and trust
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
 To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-* npm
+* brownie
   ```sh
-  npm install npm@latest -g
+  python3 -m pip install --user pipx
+  python3 -m pipx ensurepath
+  # restart your terminal
+  pipx install eth-brownie
   ```
 
-### Installation
-
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
-
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+### Testing
+1. Clone the repo
    ```sh
-   git clone https://github.com/your_username_/Project-Name.git
+   git clone https://github.com/merkle-groot/blockchain-developer-bootcamp-final-project.git
    ```
-3. Install NPM packages
+3. Install dependencies
    ```sh
-   npm install
+   cd blockchain-developer-bootcamp-final-project
+   pip install -r requirements.txt
    ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
+4. Get Ganache-gui/cli and run it it separately on port :8545
+
+5. Run the tests
+    ```sh
+    brownie test
+    ```
+  
+### Front-End
+1. Navigate into the client folder
+    ```sh
+    cd client
+    ```
+2. Install all the required npm packages
+    ```sh
+    yarn install
+    ```
+3. Run the React Project
+    ```sh
+    yarn start
+    ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -150,10 +158,8 @@ _Below is an example of how you can instruct your audience on installing and set
 
 <!-- USAGE EXAMPLES -->
 ## Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
+* The current deployed site is accessible from [this vercel deployment](https://blockchain-developer-bootcamp-final-project-o3kctl86i-bat-fleck.vercel.app/)
+* Make sure to switch your network to Kovan Testnet in Metamask before interacting with the project!
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -162,15 +168,12 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Roadmap
 
-- [x] Add Changelog
-- [x] Add back to top links
-- [ ] Add Additional Templates w/ Examples
-- [ ] Add "components" document to easily copy & paste sections of the readme
-- [ ] Multi-language Support
-    - [ ] Chinese
-    - [ ] Spanish
-
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
+- [x] Write Smart-Contracts
+- [x] Test the code
+- [x] Deploy it to Kovan
+- [x] Add a front-end to interact with it
+- [ ] Improve the UX/UI
+- [ ] Write Treasury function for blue chip lending platforms
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -197,7 +200,7 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the GNU GPL License. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -205,10 +208,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <!-- CONTACT -->
 ## Contact
-
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
-
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
+Vishnu Prakash - [@0x1379](https://twitter.com/0x1379) - visheh10@gmail.com
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -217,33 +217,7 @@ Project Link: [https://github.com/your_username/repo_name](https://github.com/yo
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
+Inspired by [Waffle Project](https://github.com/Anish-Agnihotri/waffle)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
