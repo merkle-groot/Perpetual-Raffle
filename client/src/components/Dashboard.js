@@ -7,6 +7,7 @@ import "./Dashboard.css";
 
   
 const Dashboard = () => {
+	
 	const [account, setAccount] = useState(0);
 	const [Raffle, setRaffle] = useState();
 	const [maxSlots, setMaxSlots] = useState(0);
@@ -85,49 +86,59 @@ const Dashboard = () => {
 		console.log(result);
 	}
 
-  	useEffect(() => {
-    	async function load() {
-			const web3 = new Web3(Web3.givenProvider);
-			setProvider(web3);
-			const accounts = await web3.eth.requestAccounts();
-			setAccount(accounts[0]);
+	const load = async(web3, RaffleContract, accounts) => {
 
-			const chainId = await web3.eth.getChainId();
-			console.log(chainId);
-			if(chainId != 42){
-				alert("Please switch your network to Kovan Testnet!");
-			}
+		const maxSlotsResult = await RaffleContract.methods.numSlotsAvailable().call();
+		setMaxSlots(maxSlotsResult);
 
-			web3.eth.defaultChain = "kovan";
-			// Instantiate smart contract using ABI and address.
-			const RaffleContract = new web3.eth.Contract(RaffleJSON.abi, "0xb396B1E0f0d6Eb1eBE2b059077313a68A9b78e71");
-			// set contact list to state variable.
-			setRaffle(RaffleContract);
-			// Then we get total number of contacts for iteration
-			const maxSlotsResult = await RaffleContract.methods.numSlotsAvailable().call();
-			setMaxSlots(maxSlotsResult);
+		const slotFeeResult = await RaffleContract.methods.slotPrice().call();
+		const etherValue = web3.utils.fromWei(slotFeeResult, 'ether');
+		setSlotFee(etherValue);
 
-			const slotFeeResult = await RaffleContract.methods.slotPrice().call();
-			const etherValue = web3.utils.fromWei(slotFeeResult, 'ether');
-			setSlotFee(etherValue);
+		const noOfRoundsResult = await RaffleContract.methods.noOfRounds().call();
+		setNoOfRounds(noOfRoundsResult);
 
-			const noOfRoundsResult = await RaffleContract.methods.noOfRounds().call();
-			setNoOfRounds(noOfRoundsResult);
+		const currentPhaseResult = await RaffleContract.methods.currentPhase().call();
+		setCurrentPhase(currentPhaseResult);
 
-			const currentPhaseResult = await RaffleContract.methods.currentPhase().call();
-			setCurrentPhase(currentPhaseResult);
+		const filledSlots = await RaffleContract.methods.numSlotsFilled().call();
+		setAvailableSLots(maxSlotsResult - filledSlots);
 
-			const filledSlots = await RaffleContract.methods.numSlotsFilled().call();
-			setAvailableSLots(maxSlotsResult - filledSlots);
+		const nftIDResult = await RaffleContract.methods.nftID().call();
+		setNftID(nftIDResult);
 
-			const nftIDResult = await RaffleContract.methods.nftID().call();
-			setNftID(nftIDResult);
+		const userOwnedResult = await RaffleContract.methods.addressToSlotsOwner(accounts[0]).call();
+		console.log(userOwnedResult);
+		setUserOwned(userOwnedResult);
+	}
 
-			const userOwnedResult = await RaffleContract.methods.addressToSlotsOwner(accounts[0]).call();
-			console.log(userOwnedResult);
-			setUserOwned(userOwnedResult);
+  	useEffect(async() => {
+		const web3 = new Web3(Web3.givenProvider);
+		setProvider(web3);
+		const accounts = await web3.eth.requestAccounts();
+		setAccount(accounts[0]);
+
+		const chainId = await web3.eth.getChainId();
+		console.log(chainId);
+		if(chainId != 42){
+			alert("Please switch your network to Kovan Testnet!");
 		}
-    	load();
+
+		web3.eth.defaultChain = "kovan";
+		const RaffleContract = new web3.eth.Contract(RaffleJSON.abi, "0xb396B1E0f0d6Eb1eBE2b059077313a68A9b78e71");
+		setRaffle(RaffleContract);
+
+
+		RaffleContract.events.SlotsClaimed({})
+			.on('data', async function(event){
+				console.log(event.returnValues);
+				load(web3, RaffleContract, accounts);
+			})
+			.on('error', console.error);
+
+		console.log(RaffleContract)
+
+    	load(web3, RaffleContract, accounts);
   	}, []);
 
 	return(
