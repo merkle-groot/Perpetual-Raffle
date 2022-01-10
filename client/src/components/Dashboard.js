@@ -138,6 +138,15 @@ const Dashboard = () => {
 
 		console.log(RaffleContract)
 
+		RaffleContract.events.SlotsRefunded({})
+			.on('data', async function(event){
+				console.log(event.returnValues);
+				load(web3, RaffleContract, accounts);
+			})
+			.on('error', console.error);
+
+		console.log(RaffleContract)
+
     	load(web3, RaffleContract, accounts);
   	}, []);
 
